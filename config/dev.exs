@@ -6,9 +6,10 @@ config :phoenix_rest, PhoenixRest.Repo,
   password: System.get_env("DB_PASSWORD"),
   hostname: System.get_env("DB_HOST"),
   database: System.get_env("DB_NAME"),
+  maintenance_database: System.get_env("DB_NAME"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 2
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
