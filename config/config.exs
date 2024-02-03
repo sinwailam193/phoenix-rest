@@ -8,24 +8,28 @@
 import Config
 
 config :phoenix_rest,
-  ecto_repos: [PhoenixRest.Repo],
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+    ecto_repos: [PhoenixRest.Repo],
+    generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Configures the endpoint
 config :phoenix_rest, PhoenixRestWeb.Endpoint,
-  url: [host: "localhost"],
-  adapter: Phoenix.Endpoint.Cowboy2Adapter,
-  render_errors: [
-    formats: [json: PhoenixRestWeb.ErrorJSON],
-    layout: false
-  ],
-  pubsub_server: PhoenixRest.PubSub,
-  live_view: [signing_salt: "mJcH9/h0"]
+    url: [host: "localhost"],
+    adapter: Phoenix.Endpoint.Cowboy2Adapter,
+    render_errors: [
+        formats: [json: PhoenixRestWeb.ErrorJSON],
+        layout: false
+    ],
+    pubsub_server: PhoenixRest.PubSub,
+    live_view: [signing_salt: "mJcH9/h0"]
 
 # Configures Elixir's Logger
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+    format: "$time $metadata[$level] $message\n",
+    metadata: [:request_id]
+
+config :phoenix_rest, PhoenixRestWeb.Auth.Guardian,
+    issuer: "phoenix_rest",
+    secret_key: System.get_env("GUARDIAN_SECRET")
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
