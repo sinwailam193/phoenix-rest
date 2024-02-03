@@ -9,5 +9,6 @@ defmodule PhoenixRestWeb.Router do
         pipe_through :api
 
         get "/", DefaultController, :index
+        post "/accounts", AccountController, :create
     end
 end
