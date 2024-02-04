@@ -12,10 +12,12 @@ defmodule PhoenixRestWeb.Router do
 
     pipeline :api do
         plug :accepts, ["json"]
+        plug :fetch_session
     end
 
     pipeline :auth do
         plug PhoenixRestWeb.Auth.Pipeline
+        plug PhoenixRestWeb.Auth.SetAccount
     end
 
     scope "/api", PhoenixRestWeb do
