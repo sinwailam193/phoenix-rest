@@ -12,7 +12,7 @@ defmodule PhoenixRestWeb.Auth.SetAccount do
             case get_session(conn, :account_id) do
                 nil -> raise ErrorResponse.Unauthorized
                 account_id ->
-                    case Accounts.get_account!(account_id) do
+                    case Accounts.get_account(account_id) do
                         nil -> assign(conn, :account, nil)
                         account -> assign(conn, :account, account)
                     end

@@ -37,6 +37,9 @@ defmodule PhoenixRest.Accounts do
     """
     def get_account!(id), do: Repo.get!(Account, id)
 
+
+    def get_account(id), do: Repo.get(Account, id)
+
     @doc """
     Gets a single account.any()
 
