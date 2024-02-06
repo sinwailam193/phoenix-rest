@@ -5,7 +5,7 @@ defmodule PhoenixRestWeb.AccountController do
     alias PhoenixRest.{Accounts, Accounts.Account, Users, Users.User}
 
     # run this plug only when it is hitting update or delete action
-    plug :is_authorized_account when action in [:update, :delete]
+    plug :is_authorized_account when action in [:update, :delete, :sign_out]
 
     action_fallback PhoenixRestWeb.FallbackController
 
@@ -42,6 +42,18 @@ defmodule PhoenixRestWeb.AccountController do
                 |> render(:account_token, account: account, token: token)
             {:error, :unauthorized} -> raise ErrorResponse.Unauthorized, message: "Email or password incorrect."
         end
+    end
+
+    def sign_out(conn, %{}) do
+        account = conn.assigns[:account]
+        token = Guardian.Plug.current_token(conn)
+
+        Guardian.revoke(token)
+
+        conn
+        |> Plug.Conn.clear_session()
+        |> put_status(:ok)
+        |> render(:account_token, account: account, token: nil)
     end
 
     def show(conn, %{"id" => _id}) do

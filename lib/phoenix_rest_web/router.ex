@@ -33,5 +33,6 @@ defmodule PhoenixRestWeb.Router do
 
         get "/accounts/:id", AccountController, :show
         post "/accounts/:id/update", AccountController, :update
+        delete "/accounts/:id/sign-out", AccountController, :sign_out
     end
 end
