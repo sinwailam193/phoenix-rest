@@ -32,6 +32,7 @@ defmodule PhoenixRestWeb.Router do
         pipe_through [:api, :auth]
 
         get "/accounts/:id", AccountController, :show
+        get "/accounts/:id/refresh-session", AccountController, :refresh_token
         post "/accounts/:id/update", AccountController, :update
         delete "/accounts/:id/sign-out", AccountController, :sign_out
     end
