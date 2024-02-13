@@ -9,3 +9,7 @@ end
 defmodule PhoenixRestWeb.Auth.ErrorResponse.NotFound do
     defexception [message:  "Not found.", plug_status: 404]
 end
+
+defmodule PhoenixRestWeb.Auth.ErrorResponse.InternalServerError do
+    defexception [message:  "Internal server error.", plug_status: 500]
+end

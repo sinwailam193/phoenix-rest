@@ -29,9 +29,17 @@ defmodule PhoenixRestWeb.Auth.Guardian do
             nil -> {:error, :unauthorized}
             account ->
                 case validate_password(password, account.hash_password) do
-                    true -> create_token(account)
+                    true -> create_token(account, :access)
                     false -> {:error, :unauthorized}
                 end
+        end
+    end
+
+    def authenticate(token) do
+        with {:ok, claims} <- decode_and_verify(token),
+            {:ok, account} <- resource_from_claims(claims),
+            {:ok, _old, {new_token, _new_claims}} <- refresh(token) do
+            {:ok, account, new_token}
         end
     end
 
@@ -39,10 +47,18 @@ defmodule PhoenixRestWeb.Auth.Guardian do
         Bcrypt.verify_pass(password, hash_password)
     end
 
-    defp create_token(account) do
-        {:ok, token, _claims} = encode_and_sign(account)
+    defp create_token(account, type) do
+        {:ok, token, _claims} = encode_and_sign(account, %{}, token_options(type))
 
         {:ok, account, token}
+    end
+
+    defp token_options(type) do
+        case type do
+            :access -> [token_type: "access", ttl: {2, :hour}]
+            :reset -> [token_type: "reset", ttl: {15, :minute}]
+            :admin -> [token_type: "admin", ttl: {90, :day}]
+        end
     end
 
     def after_encode_and_sign(resource, claims, token, _options) do

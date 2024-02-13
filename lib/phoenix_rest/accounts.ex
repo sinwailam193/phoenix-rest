@@ -77,6 +77,12 @@ defmodule PhoenixRest.Accounts do
         |> Repo.insert()
     end
 
+    def create_account!(attrs \\ %{}) do
+        %Account{}
+        |> Account.changeset(attrs)
+        |> Repo.insert!()
+    end
+
     @doc """
     Updates a account.
 

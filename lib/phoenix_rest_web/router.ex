@@ -6,6 +6,10 @@ defmodule PhoenixRestWeb.Router do
         conn |> json(%{status: "fail", errors: message}) |> halt()
     end
 
+    defp handle_errors(conn, %{reason: %Phoenix.ActionClauseError{}}) do
+        conn |> json(%{status: "fail", errors: "Internal server error"}) |> halt()
+    end
+
     defp handle_errors(conn, %{reason: %{message: message}}) do
         conn |> json(%{status: "fail", errors: message}) |> halt()
     end
@@ -32,7 +36,7 @@ defmodule PhoenixRestWeb.Router do
         pipe_through [:api, :auth]
 
         get "/accounts/:id", AccountController, :show
-        get "/accounts/:id/refresh-session", AccountController, :refresh_token
+        get "/accounts/:id/refresh-session", AccountController, :refresh_session
         post "/accounts/:id/update", AccountController, :update
         delete "/accounts/:id/sign-out", AccountController, :sign_out
     end

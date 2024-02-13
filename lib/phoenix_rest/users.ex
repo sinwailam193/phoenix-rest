@@ -56,6 +56,13 @@ defmodule PhoenixRest.Users do
         |> Repo.insert()
     end
 
+    def create_user!(account, attrs \\ %{}) do
+        account
+        |> Ecto.build_assoc(:user)
+        |> User.changeset(attrs)
+        |> Repo.insert!()
+    end
+
     @doc """
     Updates a user.
 

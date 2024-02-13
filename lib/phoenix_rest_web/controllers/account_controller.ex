@@ -2,10 +2,10 @@ defmodule PhoenixRestWeb.AccountController do
     use PhoenixRestWeb, :controller
 
     alias PhoenixRestWeb.Auth.{Guardian, ErrorResponse}
-    alias PhoenixRest.{Accounts, Accounts.Account, Users, Users.User}
+    alias PhoenixRest.{Repo, Accounts, Accounts.Account, Users}
 
     # run this plug only when it is hitting update or delete action
-    plug :is_authorized_account when action in [:update, :delete, :sign_out, :refresh_token]
+    plug :is_authorized_account when action in [:update, :delete, :sign_out, :refresh_session]
 
     action_fallback PhoenixRestWeb.FallbackController
 
@@ -24,16 +24,21 @@ defmodule PhoenixRestWeb.AccountController do
     end
 
     def create(conn, %{"account" => account_params}) do
-        with {:ok, %Account{} = account} <- Accounts.create_account(account_params),
-            {:ok, token, _claims} <- Guardian.encode_and_sign(account),
-            {:ok, %User{} = _user} <- Users.create_user(account, account_params) do
-            conn
-            |> put_status(:created)
-            |> render(:account_token, account: account, token: token)
+        case Repo.transaction(fn ->
+            account = Accounts.create_account!(account_params)
+            Users.create_user!(account, account_params)
+            account
+        end) do
+            {:ok, account} -> authorize_account(conn, account.email, account_params["hash_password"])
+            {:error, _} -> raise ErrorResponse.InternalServerError
         end
     end
 
     def sign_in(conn, %{"email" => email, "password" => hash_password}) do
+        authorize_account(conn, email, hash_password)
+    end
+
+    defp authorize_account(conn, email, hash_password) do
         case Guardian.authenticate(email, hash_password) do
             {:ok, account, token} ->
                 conn
@@ -44,21 +49,13 @@ defmodule PhoenixRestWeb.AccountController do
         end
     end
 
-    def refresh_token(conn, %{}) do
-        old_token = conn |> Guardian.Plug.current_token()
-        case Guardian.decode_and_verify(old_token) do
-            {:error, _reason} -> raise ErrorResponse.NotFound
-            {:ok, claims} ->
-                case Guardian.resource_from_claims(claims) do
-                    {:ok, account} ->
-                        {:ok, _old, {new_token, _new_claims}} = Guardian.refresh(old_token)
-                        conn
-                        |> Plug.Conn.put_session(:account_id, account.id)
-                        |> put_status(:ok)
-                        |> render(:account_token, account: account, token: new_token)
-                    {:error, _reason} -> raise ErrorResponse.NotFound
-                end
-        end
+    def refresh_session(conn, %{}) do
+        token = conn |> Guardian.Plug.current_token()
+        {:ok, account, new_token} = Guardian.authenticate(token)
+        conn
+        |> Plug.Conn.put_session(:account_id, account.id)
+        |> put_status(:ok)
+        |> render(:account_token, account: account, token: new_token)
     end
 
     def sign_out(conn, %{}) do
