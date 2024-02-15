@@ -1,5 +1,6 @@
 defmodule PhoenixRestWeb.AccountJSON do
     alias PhoenixRest.Accounts.Account
+    alias PhoenixRestWeb.UserJSON
 
     @doc """
     Renders a list of accounts.
@@ -27,6 +28,15 @@ defmodule PhoenixRestWeb.AccountJSON do
             id: account.id,
             email: account.email,
             token: token
+        }
+    end
+
+    def full_account(%{account: account}) do
+        %{data: userData} = UserJSON.show(%{user: account.user})
+        %{
+            id: account.id,
+            email: account.email,
+            user: userData
         }
     end
 end

@@ -71,7 +71,7 @@ defmodule PhoenixRestWeb.AccountController do
     end
 
     def show(conn, %{"id" => _id}) do
-        render(conn, :show, account: conn.assigns[:account])
+        render(conn, :full_account, account: conn.assigns[:account])
     end
 
     def update(conn, %{"account" => account_params}) do

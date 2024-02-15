@@ -40,6 +40,13 @@ defmodule PhoenixRest.Accounts do
 
     def get_account(id), do: Repo.get(Account, id)
 
+    def get_full_account(id) do
+        Account
+        |> where(id: ^id)
+        |> preload([:user])
+        |> Repo.one()
+    end
+
     @doc """
     Gets a single account.any()
 
